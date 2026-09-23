@@ -7,8 +7,8 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 
 /**
- * Tile trong Quick Settings: chạm vào là mở trợ lý ảo (voice assistant)
- * đang được đặt làm mặc định trên máy (Google Assistant, Bixby, v.v.)
+ * Tile trong Quick Settings: chạm vào là kích hoạt thẳng trợ lý ảo mặc định
+ * (giống nhấn giữ nút Home / vuốt góc màn hình), có chụp ngữ cảnh màn hình hiện tại.
  */
 class AssistantTileService : TileService() {
 
@@ -23,7 +23,10 @@ class AssistantTileService : TileService() {
     override fun onClick() {
         super.onClick()
 
-        val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
+        // ACTION_ASSIST là action chuẩn để gọi assist app đang đặt mặc định.
+        // ACTION_VOICE_COMMAND không có handler cố định trên nhiều máy nên hay
+        // bị hệ thống lái sang màn hình Settings "chọn trợ lý mặc định".
+        val intent = Intent(Intent.ACTION_ASSIST).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
