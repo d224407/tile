@@ -1,0 +1,57 @@
+name: Android Release
+
+on:
+  workflow_run:
+    workflows: ["Android Debug"]
+    types: [completed]
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    env:
+      RELEASE_STORE_FILE: ${{ github.workspace }}/release.keystore
+      RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      RELEASE_KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+      RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant Gradle permission
+        run: chmod +x ./gradlew
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$RELEASE_STORE_FILE"
+
+      - name: Build Release
+        run: ./gradlew :app:assembleGithubRelease --no-daemon
+
+      - name: Cleanup keystore
+        if: always()
+        run: rm -f "$RELEASE_STORE_FILE"
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Inure-release
+          path: app/build/outputs/apk/github/release/*.apk
+          if-no-files-found: error
