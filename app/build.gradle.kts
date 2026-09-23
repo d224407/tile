@@ -15,9 +15,31 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        // Chỉ tạo config này khi đủ 4 biến môi trường (do workflow release set ra).
+        // Build debug local bình thường không có các biến này -> bỏ qua, không lỗi.
+        val storeFile = System.getenv("RELEASE_STORE_FILE")
+        val storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+        val keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+        val keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+        if (!storeFile.isNullOrBlank() && !storePassword.isNullOrBlank() &&
+            !keyAlias.isNullOrBlank() && !keyPassword.isNullOrBlank()
+        ) {
+            create("release") {
+                this.storeFile = file(storeFile)
+                this.storePassword = storePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfigs.findByName("release")?.let {
+                signingConfig = it
+            }
         }
     }
 

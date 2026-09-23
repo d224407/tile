@@ -4,8 +4,6 @@ on:
   workflow_run:
     workflows: ["Android Debug"]
     types: [completed]
-    branches:
-      - main
 
 permissions:
   contents: write
@@ -43,7 +41,7 @@ jobs:
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$RELEASE_STORE_FILE"
 
       - name: Build Release
-        run: ./gradlew :app:assembleGithubRelease --no-daemon
+        run: ./gradlew :app:assembleRelease --no-daemon
 
       - name: Cleanup keystore
         if: always()
@@ -52,6 +50,6 @@ jobs:
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: Inure-release
-          path: app/build/outputs/apk/github/release/*.apk
+          name: app-release
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
