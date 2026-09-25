@@ -10,16 +10,16 @@
         android:icon="@drawable/ic_assistant"
         android:allowBackup="true">
 
-        <!-- Activity trống, chỉ dùng để app hiện trong launcher/settings, không bắt buộc phải có UI thật -->
-        <activity
-            android:name=".MainActivity"
+        <!-- Không có activity/launcher -> app không hiện icon ở màn hình chính,
+             chỉ tồn tại dưới dạng tile trong Quick Settings. -->
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
             android:exported="true"
-            android:theme="@android:style/Theme.NoDisplay">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <service
             android:name=".AssistantTileService"
